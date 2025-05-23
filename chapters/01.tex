@@ -2,7 +2,7 @@
 
 \section{ปัญหา Maximum Subarray}
 
-สมมติเรามีลำดับของจำนวนจริง (array) ชุดหนึ่ง และเราต้องการหาลำดับย่อยที่เรียงติดกันที่มีผลรวมมากที่สุด (จะเรียกว่าเป็น \emph{maximum subarray}) เราอาจจะทำตรง ๆ เลยโดยเช็คทุก ๆ ลำดับย่อยที่เป็นไปได้ซึ่งถ้าลำดับนี้มีจำนวนสมาชิกอยู่ $n$ ตัว จะทำให้ต้องเช็คลำดับย่อยทั้งหมด $\binom{n}{2}$ ชุด จึงต้องใช้เวลา $\Theta(n^2)$
+สมมติเรามีลำดับของจำนวนจริง (array) ชุดหนึ่ง และเราต้องการหาลำดับย่อยที่เรียงติดกันที่มีผลรวมมากที่สุด (จะเรียกว่าเป็น \emph{maximum subarray}) เราอาจจะทำตรง ๆ เลยโดยเช็คทุก ๆ ลำดับย่อยที่เป็นไปได้ซึ่งถ้าลำดับนี้มีจำนวนสมาชิกอยู่ $n$ ตัว จะทำให้ต้องเช็คลำดับย่อยทั้งหมด $\binom{n}{2}$ ชุด จึงต้องใช้เวลา $\Omega(n^2)$
 
 อีกวิธีที่ดีกว่าคือการใช้ recursion โดยเราจะแบ่ง array ที่ได้รับมานี้ออกเป็น 2 subarray (โดยจะเก็บ index ไว้สามตัวคือ $\var{low}$, $\var{mid}$, และ $\var{high}$) ไปเรื่อย ๆ และหา maximum subarray ของ subarray ซ้าย, subarray ขวา, และ maximum subarray ที่ข้ามจุดแบ่ง (crossing subarray) จากนั้นเลือกค่าที่มากที่สุดในสามกรณีนี้
 
@@ -25,9 +25,7 @@
                 $\var{maxLeft}$ \gets $i$
             }
         }
-        $\vrsum$ \gets $-\infty$\;
-        $\vsum$ \gets 0\;
-        \tcp{(do similarly for $\vrsum$)}
+        do similarly for the right, i.e., find maximum $\var{rightSum}$ and $\var{maxRight}$ index\;
         \Ret{$\tuple{\var{maxLeft}, \var{maxRight}, \vlsum + \vrsum}$}
     }
 \end{codebox}
