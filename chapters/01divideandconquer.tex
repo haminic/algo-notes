@@ -1,0 +1,62 @@
+\chapter{Divide-and-Conquer}
+
+\section{ปัญหา Maximum Subarray}
+
+สมมติเรามีลำดับของจำนวนจริง (array) ชุดหนึ่ง และเราต้องการหาลำดับย่อยที่เรียงติดกันที่มีผลรวมมากที่สุด (จะเรียกว่าเป็น \emph{maximum subarray}) เราอาจจะทำตรง ๆ เลยโดยเช็คทุก ๆ ลำดับย่อยที่เป็นไปได้ซึ่งถ้าลำดับนี้มีจำนวนสมาชิกอยู่ $n$ ตัว จะทำให้ต้องเช็คลำดับย่อยทั้งหมด $\binom{n}{2}$ ชุด จึงต้องใช้เวลา $\Omega(n^2)$
+
+อีกวิธีที่ดีกว่าคือการใช้ recursion โดยเราจะแบ่ง array ที่ได้รับมานี้ออกเป็น 2 subarray (โดยจะเก็บ index ไว้สามตัวคือ $\id{low}$, $\id{mid}$, และ $\id{high}$) ไปเรื่อย ๆ และหา maximum subarray ของ subarray ซ้าย, subarray ขวา, และ maximum subarray ที่ข้ามจุดแบ่ง (crossing subarray) จากนั้นเลือกค่าที่มากที่สุดในสามกรณีนี้
+
+สังเกตว่าเราสามารถหา maximum crossing subarray ของ array $A$ ขนาด $n$ ที่ผ่าน $\id{mid}$ ได้โดยการหา maximum subarray ของครึ่งซ้ายรวมกับของครึ่งขวา:
+\begin{codebox}{การหา Maximum Crossing Subarray}
+    \Function{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}
+        \State $\id{leftSum} \gets -\infty$
+        \State $\id{sum} \gets 0$
+        \For{$i\gets\id{mid}$ \Downto $\id{low}$}
+            \State $\id{sum} \gets \id{sum} + A[i]$
+            \If{$\id{sum} > \id{leftSum}$}
+                \State $\id{leftSum} = \id{sum}$
+                \State $\id{maxLeft} = i$
+            \EndIf
+        \EndFor
+        \State do similarly for the right, looping from $\id{mid}+1$ to $\id{high}$
+        % \State $\id{rightSum} \gets -\infty$
+        % \State $\id{sum} \gets 0$
+        % \For{$i\gets\id{mid}+1$ \To $\id{high}$}
+        %     \State $\id{sum} \gets \id{sum} + A[i]$
+        %     \If{$\id{sum} > \id{rightSum}$}
+        %         \State $\id{rightSum} = \id{sum}$
+        %         \State $\id{maxLeft} = i$
+        %     \EndIf
+        % \EndFor
+        \State \Return $\ab(\id{maxLeft}, \id{maxRight}, \id{leftSum} + \id{rightSum})$
+    \EndFunction
+\end{codebox}
+ซึ่งใช้เวลา $\Theta(n)$
+
+ดังนั้นก็จะได้อัลกอริทึมในการหา maximum subarray โดยการ \emph{divide-and-conquer}:
+\begin{icodebox}{อัลกอริทึม Maximum Subarray โดยใช้ Divide-and-Conquer}
+    \Function{findMaxSubarray}{A, \id{low}, \id{high}}
+        \If{$\id{low} = \id{high}$}
+            \State \Return $\ab(\id{low}, \id{high}, A[\id{low}])$
+        \EndIf
+        \State $\id{mid} \gets \floor{(\id{low} + \id{high})/2}$
+        \State $\tup{left}{3} \gets \call{findMaxSubarray}{A, \id{low}, \id{mid}}$
+        \State $\tup{mid}{3} \gets \call{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}$
+        \State $\tup{right}{3} \gets \call{findMaxSubarray}{A, \id{mid}+1, \id{high}}$
+        \State $\id{maxSubarray} \gets$ choose $x \in \{\id{left}, \id{mid}, \id{right}\}$ with maximum $x_3$
+        \State \Return $\tup{maxSubarray}{3}$
+    \EndFunction
+\end{icodebox}
+โดยเราจะเรียก $\call{findMaxSubarray}{A, 1, A.\id{length}}$ เมื่อต้องการหา maximum subarray ของ $A$ 
+
+ถ้ากำหนดให้อัลกอริทึมนี้ทำงานได้ในเวลา $T(n)$ ก็จะได้ความสัมพันธ์
+\begin{eqnobox}
+    T(n) = T(\floor{n/2}) + T(\ceiling{n/2}) + \Theta(n)
+\end{eqnobox}
+(เพราะการหา $\id{left}$ และ $\id{right}$ เป็นการเรียกฟังก์ชันเดิมนี้ซ้ำ โดยที่ array มีขนาดลดลงครึ่งหนึ่ง ใช้เวลา $T(\floor{n/2})$, การหา $\id{mid}$ ใช้เวลา $\Theta(n)$, และที่เหลือทั้งหมดใช้เวลา $\Theta(1)$) โดยในส่วนถัด ๆ ไปเราจะแก้ได้ว่าความสัมพันธ์เวียนเกิดนี้มีคำตอบ $T(n) = \Theta(n\lg n)$ ซึ่งเร็วกว่าการทำตรง ๆ
+
+\section{อัลกอริทึมการคูณเมทริกซ์ของ Strassen}
+
+จากที่ได้เห็นว่าการใช้ divide-and-conquer อาจทำให้ได้อัลกอริทึมที่ไวกว่าการทำปกติ เราลองมาพยายามใช้ divide-and-conquer กับการคูณเมทริกซ์
+
+\section{ความสัมพันธ์เวียนเกิด}
