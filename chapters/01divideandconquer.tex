@@ -8,55 +8,115 @@
 
 สังเกตว่าเราสามารถหา maximum crossing subarray ของ array $A$ ขนาด $n$ ที่ผ่าน $\id{mid}$ ได้โดยการหา maximum subarray ของครึ่งซ้ายรวมกับของครึ่งขวา:
 \begin{codebox}{การหา Maximum Crossing Subarray}
-    \Function{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}
-        \State $\id{leftSum} \gets -\infty$
-        \State $\id{sum} \gets 0$
-        \For{$i\gets\id{mid}$ \Downto $\id{low}$}
-            \State $\id{sum} \gets \id{sum} + A[i]$
-            \If{$\id{sum} > \id{leftSum}$}
-                \State $\id{leftSum} = \id{sum}$
-                \State $\id{maxLeft} = i$
-            \EndIf
-        \EndFor
-        \State do similarly for the right, looping from $\id{mid}+1$ to $\id{high}$
-        % \State $\id{rightSum} \gets -\infty$
-        % \State $\id{sum} \gets 0$
-        % \For{$i\gets\id{mid}+1$ \To $\id{high}$}
-        %     \State $\id{sum} \gets \id{sum} + A[i]$
-        %     \If{$\id{sum} > \id{rightSum}$}
-        %         \State $\id{rightSum} = \id{sum}$
-        %         \State $\id{maxLeft} = i$
-        %     \EndIf
-        % \EndFor
-        \State \Return $\ab(\id{maxLeft}, \id{maxRight}, \id{leftSum} + \id{rightSum})$
-    \EndFunction
+	\Function{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}
+		\State $\id{leftSum} \gets -\infty$
+		\State $\id{sum} \gets 0$
+		\For{$i\gets\id{mid}$ \Downto $\id{low}$}
+			\State $\id{sum} \gets \id{sum} + A[i]$
+			\If{$\id{sum} > \id{leftSum}$}
+				\State $\id{leftSum} = \id{sum}$
+				\State $\id{maxLeft} = i$
+			\EndIf
+		\EndFor
+		\State ทำคล้ายกันสำหรับฝั่งขวา โดยลูปตั้งแต่ $\id{mid}+1$ ถึง $\id{high}$
+		% \State $\id{rightSum} \gets -\infty$
+		% \State $\id{sum} \gets 0$
+		% \For{$i\gets\id{mid}+1$ \To $\id{high}$}
+		%     \State $\id{sum} \gets \id{sum} + A[i]$
+		%     \If{$\id{sum} > \id{rightSum}$}
+		%         \State $\id{rightSum} = \id{sum}$
+		%         \State $\id{maxLeft} = i$
+		%     \EndIf
+		% \EndFor
+		\State \Return $\tuple{\id{maxLeft}, \id{maxRight}, \id{leftSum} + \id{rightSum}}$
+	\EndFunction
 \end{codebox}
 ซึ่งใช้เวลา $\Theta(n)$
 
 ดังนั้นก็จะได้อัลกอริทึมในการหา maximum subarray โดยการ \emph{divide-and-conquer}:
 \begin{icodebox}{อัลกอริทึม Maximum Subarray โดยใช้ Divide-and-Conquer}
-    \Function{findMaxSubarray}{A, \id{low}, \id{high}}
-        \If{$\id{low} = \id{high}$}
-            \State \Return $\ab(\id{low}, \id{high}, A[\id{low}])$
-        \EndIf
-        \State $\id{mid} \gets \floor{(\id{low} + \id{high})/2}$
-        \State $\tup{left}{3} \gets \call{findMaxSubarray}{A, \id{low}, \id{mid}}$
-        \State $\tup{mid}{3} \gets \call{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}$
-        \State $\tup{right}{3} \gets \call{findMaxSubarray}{A, \id{mid}+1, \id{high}}$
-        \State $\id{maxSubarray} \gets$ choose $x \in \{\id{left}, \id{mid}, \id{right}\}$ with maximum $x_3$
-        \State \Return $\tup{maxSubarray}{3}$
-    \EndFunction
+	\Function{findMaxSubarray}{A, \id{low}, \id{high}}
+		\If{$\id{low} = \id{high}$}
+			\State \Return $\ab(\id{low}, \id{high}, A[\id{low}])$ \Comment{ขั้นฐานเมื่อ subarray มีขนาดเป็น $1$}
+		\EndIf
+		\State $\id{mid} \gets \floor{(\id{low} + \id{high})/2}$
+		\State $\tup{left}{3} \gets \call{findMaxSubarray}{A, \id{low}, \id{mid}}$
+		\State $\tup{mid}{3} \gets \call{findMaxCrossingSubarray}{A, \id{low}, \id{mid}, \id{high}}$
+		\State $\tup{right}{3} \gets \call{findMaxSubarray}{A, \id{mid}+1, \id{high}}$
+		\State $\id{maxSubarray} \gets$ เลือก $x \in \{\idlist{\id{left}, \id{mid}, \id{right}}\}$ ที่มีค่าของ $x_3$ มากที่สุด
+		\State \Return $\tup{maxSubarray}{3}$
+	\EndFunction
 \end{icodebox}
 โดยเราจะเรียก $\call{findMaxSubarray}{A, 1, A.\id{length}}$ เมื่อต้องการหา maximum subarray ของ $A$ 
 
 ถ้ากำหนดให้อัลกอริทึมนี้ทำงานได้ในเวลา $T(n)$ ก็จะได้ความสัมพันธ์
 \begin{eqnobox}
-    T(n) = T(\floor{n/2}) + T(\ceiling{n/2}) + \Theta(n)
+	T(n) = T(\floor{n/2}) + T(\ceiling{n/2}) + \Theta(n)
 \end{eqnobox}
 (เพราะการหา $\id{left}$ และ $\id{right}$ เป็นการเรียกฟังก์ชันเดิมนี้ซ้ำ โดยที่ array มีขนาดลดลงครึ่งหนึ่ง ใช้เวลา $T(\floor{n/2})$, การหา $\id{mid}$ ใช้เวลา $\Theta(n)$, และที่เหลือทั้งหมดใช้เวลา $\Theta(1)$) โดยในส่วนถัด ๆ ไปเราจะแก้ได้ว่าความสัมพันธ์เวียนเกิดนี้มีคำตอบ $T(n) = \Theta(n\lg n)$ ซึ่งเร็วกว่าการทำตรง ๆ
 
 \section{อัลกอริทึมการคูณเมทริกซ์ของ Strassen}
 
-จากที่ได้เห็นว่าการใช้ divide-and-conquer อาจทำให้ได้อัลกอริทึมที่ไวกว่าการทำปกติ เราลองมาพยายามใช้ divide-and-conquer กับการคูณเมทริกซ์
+\subsection{การคูณเมทริกซ์จตุรัสโดยใช้ Divide-and-Conquer แบบตรง ๆ}
+
+จากที่ได้เห็นว่าการใช้ divide-and-conquer อาจทำให้ได้อัลกอริทึมที่ไวกว่าการทำปกติ เราลองมาพยายามใช้ divide-and-conquer กับการคูณเมทริกซ์จตุรัส โดยแบ่งเมทริกซ์ $n\times n$ เป็น $4$ เมทริกซ์ที่มีขนาด $n/2\times n/2$ (อาจปัดขึ้น-ปัดลงได้เพื่อให้เป็นจำนวนเต็ม แต่จะละไว้ในฐานที่เข้าใจเพราะจริง ๆ แล้วเราสามารถพิสูจน์ได้ว่าการปัดขึ้น-ปัดลงไม่ส่งผลต่อ asymptotic runtime ของอัลกอริทึม) แล้วค่อยนำเมทริกซ์ย่อยมาคูณกัน ดังนี้
+\begin{codebox}{อัลกอริทึมการคูณเมทริกซ์จตุรัสโดยใช้ Divide-and-Conquer}
+	\Function{recurMatrixMultiply}{A, B}
+		\State $n \gets A.\id{rows}$
+		\State ให้ $C$ เป็นเมทริกซ์ใหม่ที่แทนผลลัพธ์ของ $A\times B$
+		\If{$n = 1$}
+			\State $c_{11} \gets a_{11}b_{11}$ \Comment{ขั้นฐานในกรณี $n=1$ ให้คูณแบบสเกลาร์ปกติ}
+		\Else
+			\State แบ่งเมทริกซ์ $A$, $B$, และ $C$ ออกเป็น $A_{11}$, $A_{12}$, $A_{21}$, $A_{22}$, \dots\ ที่มีขนาด $n/2 \times n/2$
+			\State $C_{11} \gets \call{recurMatrixMultiply}{A_{11}, B_{11}} + \call{recurMatrixMultiply}{A_{12}, B_{21}}$
+			\State $C_{12} \gets \call{recurMatrixMultiply}{A_{11}, B_{12}} + \call{recurMatrixMultiply}{A_{12}, B_{22}}$
+			\State $C_{21} \gets \call{recurMatrixMultiply}{A_{21}, B_{11}} + \call{recurMatrixMultiply}{A_{22}, B_{21}}$
+			\State $C_{22} \gets \call{recurMatrixMultiply}{A_{21}, B_{11}} + \call{recurMatrixMultiply}{A_{22}, B_{21}}$
+		\EndIf
+		\State \Return $C$
+	\EndFunction
+\end{codebox}
+หมายเหตุ: \emph{การคูณทั้งหมดนี้เป็นการคูณจาก index จึงไม่ต้องเสัยเวลาในการคัดลอกข้อมูลมาใส่เมทริกซ์ใหม่ทุกการ call}
+
+โดยถ้าอัลกอริทึมนี้ใช้เวลา $T(n)$ ในการคูณเมทริซ์จตุรัสขนาด $n\times n$ เรามาพิจารณาความสัมพันธ์เวียนเกิดของ $T$ โดยเริมจากการแบ่งเมทริกซ์ ใช้เวลา $\Theta(1)$ (เพราะเป็นการคูณโดยแบ่งจาก index) และถัดมาเราจะต้องเรียกฟังก์ชันนี้ซ้อนไปอีก $8$ รอบ ใช้เวลา $8T(n/2)$ สุดท้าย ในการนำเมทริกซ์ย่อยที่คูณกันแล้วมาบวกกัน ใช้เวลา $\Theta(n^2)$ ดังนั้น
+\begin{eqnobox}[label=01:eq:matrixrecursion]
+	T(n) = 8\,T(n/2) + \Theta(n^2)
+\end{eqnobox}
+ซึ่งเมื่อใช้ master theorm (ในส่วนถัดไป) จะได้ว่า $T(n) = \Theta(n^3)$ ซึ่งไม่ต่างอะไรกับการเขียนแบบคูณตรง ๆ จึงไม่ได้มีประโยชน์อะไรมากนัก
+
+\subsection{การคูณเมทริกซ์จตุรัสด้วยอัลกอริทึมของ Strassen}
+
+แต่ Volker Strassen ได้ค้นพบวิธีทั่วไปที่เร็วกว่าแบบทำตรง ๆ ที่มีไอเดียมาจาก divide-and-conquer เช่นกัน โดยสังเกตว่าจาก (\ref{01:eq:matrixrecursion}) การบวกเมทริกซ์ไม่ได้ส่งผลกับความสัมพันธ์เวียนเกิดเท่าไหร่ เพราะไม่วาจะบวกกันกี่ครั้ง ถ้าจำนวนครั้งในการบวกคงที่ สุดท้ายแล้วพจน์หลังก็จะเป็น $\Theta(n^2)$ อยู่ดี แต่ในทางกลับกันจำนวนครั้งในการคูณเมทริกซ์ส่งผลโดยตรงกับสัมประสิทธ์ด้านหน้า $T(n/2)$ ดังนั้นถ้าเราสามารถลดจำนวนครั้งในการคูณเมทริกซ์โดยแลกกับการบวกเมทริกซ์เพิ่มอีกนิด ตามเซนส์แล้วน่าจะทำให้ time complexity สุดท้ายลดลง (เหตุผลจริง ๆ คือจาก master theorem แล้ว $n^{\log_2 8}/n^2 = n^1$ แปลว่ายังสามารถลด $8$ ลงไปได้อีกในขณะที่ยังไม่ทำให้พจน์ $\Theta(n^2)$ โตเร็วเกินไป)
+
+โดยอัลกอริทึมของ Strassen ลดจำนวนการคูณเมทริกซ์ย่อยจาก $8$ ครั้งเหลือเพียง $7$ ครั้ง แลกกับการบวกและลบเมทริกซ์เพิ่มขึ้น ดังนี้:
+\begin{icodebox}{อัลกอริทึมการคูณเมทริกซ์จตุรัสของ Strassen}
+	\Function{strassenMatrixMultiply}{A, B}
+		\State $n \gets A.\id{rows}$
+		\If{$n = 1$}
+			\State $c_{11} \gets a_{11}b_{11}$
+		\Else
+			\State แบ่งเมทริกซ์ $A$, $B$, และ $C$ ออกเป็น $A_{11}$, $A_{12}$, $A_{21}$, $A_{22}$, \dots\ ที่มีขนาด $n/2 \times n/2$
+			\State $P_1 \gets \call{strassenMatrixMultiply}{A_{11} + A_{22}, B_{11} + B_{22}}$
+			\State $P_2 \gets \call{strassenMatrixMultiply}{A_{21} + A_{22},\ B_{11}}$
+			\State $P_3 \gets \call{strassenMatrixMultiply}{A_{11}, B_{12} - B_{22}}$
+			\State $P_4 \gets \call{strassenMatrixMultiply}{A_{22}, B_{21} - B_{11}}$
+			\State $P_5 \gets \call{strassenMatrixMultiply}{A_{11} + A_{12}, B_{22}}$
+			\State $P_6 \gets \call{strassenMatrixMultiply}{A_{21} - A_{11}, B_{11} + B_{12}}$
+			\State $P_7 \gets \call{strassenMatrixMultiply}{A_{12} - A_{22}, B_{21} + B_{22}}$
+			\State $C_{11} \gets P_1 + P_4 - P_5 + P_7$
+			\State $C_{12} \gets P_3 + P_5$
+			\State $C_{21} \gets P_2 + P_4$
+			\State $C_{22} \gets P_1 - P_2 + P_3 + P_6$
+		\EndIf
+		\State \Return $C$
+	\EndFunction
+\end{icodebox}
+ซึ่งจะได้ความสัมพันธ์เวียนเกิดของเวลาในการทำงานคือ
+\begin{eqnobox}
+	T(n) = 7\,T(n/2) + \Theta(n^2)
+\end{eqnobox}
+ซึ่งเมื่อใช้ master theorem จะได้ว่า $T(n) = \Theta(n^{\log_2 7}) \approx \Theta(n^{2.81})$ เร็วกว่าการคูณแบบปกติที่ใช้เวลา $\Theta(n^3)$
+
+การคูณและนำมาประกอบกันแบบนี้ดูเหมือน \emph{black magic} แต่ไอเดียหลัก ๆ คือเมื่อลองพิจารณาจากความสัมพันธ์เวียนเกิด เราสามารถสังเกตได้ว่าการบวก ``คุ้ม'' กว่าการคูณมากในแง่ของเวลาในการทำงาน ดังนั้นหากสามารถลดจำนวนการคูณลงได้ แม้จะต้องเพิ่มจำนวนการบวกขึ้น ก็จะทำให้ time complexity โดยรวมลดลงอย่างมีนัยสำคัญ
 
 \section{ความสัมพันธ์เวียนเกิด}
