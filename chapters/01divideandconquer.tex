@@ -152,11 +152,59 @@
 	ในทำนองเดียวกันเราจะสามารถแสดงได้ว่า $T(n) = \Omega(n\lg n)$ และเนื่องจาก $T(n) = O(n\lg n)$ และ $T(n) = \Omega(n\lg n)$ ก็จะได้ว่า $T(n) = \Theta(n\lg n)$ ตามต้องการ
 \end{proof}
 
-แต่กสังเกตว่าการพิสูจน์คำตอบแบบนี้เราจะต้อง ``เดา'' คำตอบของความสัมพันธ์เวียนเกิดให้ได้ก่อน โดยวิธีในการเดาคำตอบที่ดีวิธีหนึ่งคือการวาด \emph{recursion tree} (หรือบางครั้งถ้าเขียนออกมาดีพอ อาจนับว่าเป็นการพิสูจน์ได้เลย) ยกตัวอย่างเช่น
+แต่กสังเกตว่าการพิสูจน์คำตอบแบบนี้เราจะต้อง ``เดา'' คำตอบของความสัมพันธ์เวียนเกิดให้ได้ก่อน โดยวิธีในการเดาคำตอบที่ดีวิธีหนึ่งคือการพิจารณา \emph{recursion tree} (หรือบางครั้งถ้าเขียนออกมาดีพอ อาจนับว่าเป็นการพิสูจน์ได้เลย) ยกตัวอย่างเช่น
 
 \begin{exbox}
-	จงพิสูจน์ว่าความสัมพันธ์เวียนเกิด $T(n) = 4\,T(n/2) + n^2\lg n$ มีคำตอบคือ $T(n) = O(n^2\lg^2 n)$
+	จงหา asymptotic upper bound ของความสัมพันธ์เวียนเกิด $T(n) = 4\,T(n/2) + n^2\lg n$
 \end{exbox}
+\begin{soln}
+	พิจารณา recursion tree ของ $T(n)$ (โดยสมมติว่า $n$ เป็นกำลังของ $2$) จะได้ว่าเราสามารถ ``แตกกิ่ง'' ลงมาจนถึง $T(1)$ ได้ $\lg n$ ครั้ง ในชั้นที่ $i$ จะมีจำนวนโหนดทั้งหมด $4^i$ โหนดดังนั้นแต่ละครั้งที่แตกกิ่งออกมาจากชั้นที่ $i$ ก็จะเกิดพจน์ $\ab(n/2^i)^2\lg\ab(n/2^i) = \ab(n^2/4^i)\ab(\lg n - i)$ มาทั้งหมด $4^i$ พจน์ และในชั้นสุดท้ายจะมี $T(1)$ ทั้งหมด $4^{\lg n} = n^2$ พจน์ ดังนั้นจะได้
+	\begin{align*}
+		T(n) &= n^2\,T(1) + \sum_{i=0}^{\lg n-1}\ab(\bcancel{4^i})\ab(\frac{n^2}{\bcancel{4^i}})\ab(\lg n - i)\\
+		&= n^2\,T(1) + n^2\lg^2 n - n^2\sum_{i=0}^{\lg n-1}i\\
+		&= n^2\,T(1) + n^2\lg^2 n - \frac{n^2}{2}(\lg^2 n - \lg n)\\
+		&= n^2\,T(1) + \frac{1}{2}n^2\lg^2 n + \frac{1}{2}n^2\lg n
+	\end{align*}
+	ดังนั้นจะเห็นได้ว่า $T(n) = O(n^2\lg n)$ โดยเราสามารถพิสูจน์ได้อย่างเป็นทางการคล้าย ๆ กับข้อที่แล้วว่าเป็นจริง
+\end{soln}
+
+\subsection{Master Theorem}
+
+\begin{lawbox}[label=01:thm:master]{Master Theorem}
+	สำหรับความสัมพันธ์เวียนเกิด $T(n) = a\,T(n/b) + f(n)$ (โดยที่ $n/b$ อาจเป็นปัดขั้นหรือปัดลง) จะได้ว่า
+	\begin{compactenum}[label=(\roman*)]
+		\item ถ้า $f(n) = O\ab(n^{\log_b a - \eps})$ สำหรับบาง $\eps > 0$ (กล่าวคือ $f(n)$ โตช้ากว่า $n^{\log_b a}$ \emph{ในเชิงพหุนาม}) แล้ว $T(n) = \Theta\ab(n^{\log_b a})$
+		\item ถ้า $f(n) = \Theta\ab(n^{\log_b a})$ แล้ว $T(n) = \Theta\ab(f(n)\lg n) = \Theta\ab(n^{\log_b a}\cdot\lg n)$
+		\item ถ้า $f(n) = \Omega\ab(n^{\log_b a + \eps})$ สำหรับบาง $\eps > 0$ ($f(n)$ โตเร็วกว่า $n^{\log_b a}$ ในเชิงพหุนาม) และ $a\,f(n/b) \leq c\,f(n)$ สำหรับบางจำนวนจริง $c < 1$ เมื่อ $n$ มีค่ามากพอ แล้ว $T(n) = \Theta\ab(f(n))$
+	\end{compactenum}
+\end{lawbox}
 \begin{proof}
+	(แบบคร่าว ๆ) จะพิสูจน์แค่ในกรณี $n = b^k$ เพื่อให้ได้ intuition
 	
+	พิจารณา recursion tree ของความสัมพันธ์เวียนเกิดนี้ จะได้ว่าเราสามารถแต่งกิ่งลงไปได้ $\log_b n$ ครั้ง โดยในแต่ละชั้นที่ $i$ จะมีจำนวนโหนด $a^i$ โหนด และแต่ละโหนดจะทำใหเกิดพจน์ $f(n/b^i)$ ดังนั้นผลรวมทั้งหมดคือ
+	\begin{equation}
+		T(n) = a^{\log_b n}\,T(1) + \sum_{i=0}^{\log_b n - 1} a^i f\ab(\frac{n}{b^i}) \equiv \Theta\ab(n^{\log_b a}) + g(n)\tag{$\odot$}\label{01:eq:masterproof}
+	\end{equation}
+
+	\underline{กรณี (i)}: สมมติ $f(n) = O\ab(n^{\log_b a - \eps})$ จะได้ว่า
+	\[
+		g(n) = O\ab(\sum_{i=0}^{\log_b n - 1} a^i \ab(\frac{n}{b^i})^{\log_b a -\eps}) = O\ab(n^{\log_b a -\eps}\sum_{i=0}^{\log_bn-1}\bcancel{a^i}\ab(\frac{b^\eps}{\bcancel{a^i}})) = O\ab(n^{\log_b a})
+	\]
+	เมื่อนำไปแทนกลับใน (\ref{01:eq:masterproof}) จะได้ว่า $T(n) = \Theta\ab(n^{\log_ba})$
+
+	\underline{กรณี (ii)}: สมมติ $f(n) = \Theta\ab(n^{\log_b a})$ ก็จะได้ว่า
+	\[
+		g(n) = \Theta\ab(\sum_{i=0}^{\log_ba-1}a^i\ab(\frac{n}{b^i})^{\log_ba}) = \Theta\ab(\sum_{i=0}^{\log_ba-1}n^{\log_ba}) = \Theta\ab(n^{\log_ba}\lg n)
+	\]
+	แทนใน (\ref{01:eq:masterproof}) จะได้ $T(n) = \Theta\ab(n^{\log_ba}\lg n)$
+
+	\underline{หรณีที่ (iii)}: สมมติ $a\,f(n/b) \leq c\,f(n)$ สำหรับจำนวนจริง $c < 1$ และ $f(n) = \Omega\ab(n^{\log_b a - \eps})$ จากเงื่อนไขแรกเราจะได้ว่า $a^i\,f(n/b^i) \leq c^i\,f(n)$ ทุกค่า $i$ ตราบใดที่ $n$ มีค่ามากพอ ดังนั้น
+	\[
+		g(n) = \sum_{i=0}^{\log_ba-1}a^if\ab(\frac{n}{b^i}) \leq \sum_{i=0}^{\log_ba-1}c^if(n) \leq \frac{1}{1-c}f(n)
+	\]
+	ก็จะได้ $g(n) = O(f(n))$ (เรื่องที่อสมการนี้จริงก็ต่อเมื่อ $n$ มีค่ามากพอนั้นเราสามารถละได้เพราะสุดท้ายแล้วในการ bound ค่า จะเกิดความต่างจากค่าที่ถูก bound แค่เพียง constant หนึ่ง ซึ่งไม่มีผลผลใน asymptotic bound) รวมกับการที่ $g(n) = \Omega\ab(f(n))$ (เพราะ $g(n)$ มีพจน์ $f(n)$ อย่างน้อยหนึ่งพจน์แน่ ๆ และพจน์อื่น ๆ ไม่เป็นลบ) จะได้ว่า $g(n) = \Theta\ab(f(n))$ หรือเมื่อแทนใน (\ref{01:eq:masterproof}) จะได้ $T(n) = \Theta\ab(f(n))$
+
+	หมายเหตุ: \emph{จริง ๆ แล้วจะเห็นได้ว่าในกรณี (iii) เราไม่จำเป็นจะต้องมีเงื่อนไข $f(n) = \Omega\ab(n^{\log_b a + \eps})$ (แต่สามารถพิสูจน์ได้ว่าเงื่อนไข regularity $af(n/b) \leq cf(n)$ imply ว่าเงื่อนไขแรกต้องจริงอยู่ดี)}
+
+	จากทั้งสามกรณี จะได้ว่า master theorem เป็นจริง (เมื่อ $n = b^k$) ตามต้องการ
 \end{proof}
